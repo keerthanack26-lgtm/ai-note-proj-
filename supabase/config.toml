@@ -1,0 +1,32 @@
+project_id = "voicenote-ai"
+
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/**", "http://127.0.0.1:5173/**"]
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+# Local testing: skip confirmation emails so the free mailer limit is not hit.
+# Set this back to true before inviting real users.
+enable_confirmations = false
+
+[functions.process-audio]
+verify_jwt = true
+entrypoint = "./functions/process-audio/index.js"
+
+[functions.chat-with-note]
+verify_jwt = true
+entrypoint = "./functions/chat-with-note/index.js"
+
+[functions.admin-operations]
+verify_jwt = true
+entrypoint = "./functions/admin-operations/index.js"
+
+[functions.cleanup-audio]
+verify_jwt = true
+entrypoint = "./functions/cleanup-audio/index.js"
+
+[functions.delete-account]
+verify_jwt = true
+entrypoint = "./functions/delete-account/index.js"

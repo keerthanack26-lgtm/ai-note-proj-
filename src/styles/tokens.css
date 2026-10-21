@@ -1,0 +1,34 @@
+:root {
+  --navy: #102a4c;
+  --navy-700: #1b3a63;
+  --navbar: #10243b;
+  --blue: #1769e8;
+  --blue-dark: #0f55c7;
+  --accent: #2684ff;
+  --cyan: #2684ff;
+  --cyan-soft: #e3eeff;
+  --bg: #f4f8fd;
+  --surface: #ffffff;
+  --surface-muted: #eef5fd;
+  --icon-bg: #e3eeff;
+  --text: #102a4c;
+  --muted: #607d9f;
+  --border: #dce8f7;
+  --danger: #b4233c;
+  --danger-soft: #fdecef;
+  --success: #0f7b55;
+  --success-soft: #e8f7f1;
+  --warning: #8a5a00;
+  --warning-soft: #fff6e5;
+  --info-soft: #e3eeff;
+  --shadow: 0 12px 32px rgba(25, 70, 130, 0.08);
+  --shadow-sm: 0 4px 16px rgba(25, 70, 130, 0.08);
+  --shadow-hover: 0 16px 36px rgba(25, 70, 130, 0.14);
+  --radius: 18px;
+  --radius-lg: 20px;
+  --radius-sm: 10px;
+  --sidebar: 260px;
+  --topbar: 68px;
+  --font: "Inter", "Segoe UI", system-ui, sans-serif;
+  --focus: 0 0 0 3px rgba(38, 132, 255, 0.35);
+}
