@@ -1,5 +1,14 @@
 import { supabase } from '../lib/supabase'
-import { baseMime, ensureGeminiAudio, extensionForMime, needsWavConversion } from '../utils/audio'
+import {
+  baseMime,
+  canonicalMime,
+  ensureGeminiAudio,
+  extensionForMime,
+  fileExtension,
+  needsWavConversion,
+  prepareAudioFile,
+  resolveAudioMime,
+} from '../utils/audio'
 
 const BUCKET = 'voice-recordings'
 
@@ -56,18 +65,21 @@ async function requireSession() {
 
 export async function createAudioJob({ file, source, durationSeconds, onProgress, signal }) {
   const { client, user, accessToken } = await requireSession()
-  const ready = await ensureGeminiAudio(file)
+  const prepared = await prepareAudioFile(file)
+  const ready = await ensureGeminiAudio(prepared)
   const audioId = crypto.randomUUID()
-  const mime = baseMime(ready.type) === 'audio/weba' || String(ready.name || '').toLowerCase().endsWith('.weba')
-    ? 'audio/webm'
-    : (baseMime(ready.type) || 'audio/webm')
-  const path = `${user.id}/${audioId}.${extensionForMime(mime)}`
+  const mime = resolveAudioMime(ready) || canonicalMime(ready.type) || 'audio/webm'
+  const ext = fileExtension(ready.name) || extensionForMime(mime)
+  const path = `${user.id}/${audioId}.${ext}`
   onProgress?.(1)
   const { data: signed, error: signedError } = await client.storage.from(BUCKET).createSignedUploadUrl(path)
   if (signedError) throw new Error('A private upload link could not be created.')
+
+  const uploadFile = ready.type === mime ? ready : new File([ready], ready.name, { type: mime, lastModified: ready.lastModified })
+
   await uploadWithProgress({
     signedUrl: signed.signedUrl,
-    file: ready,
+    file: uploadFile,
     accessToken,
     apiKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     onProgress,
@@ -79,7 +91,7 @@ export async function createAudioJob({ file, source, durationSeconds, onProgress
     .insert({
       id: audioId,
       user_id: user.id,
-      file_name: ready.name || `recording-${audioId}.${extensionForMime(mime)}`,
+      file_name: ready.name || `recording-${audioId}.${ext}`,
       storage_path: path,
       mime_type: mime,
       file_size: ready.size,

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Upload } from 'lucide-react'
-import { validateAudioFile } from '../utils/audio'
+import { filePickerAccept, validateAudioFile } from '../utils/audio'
 import { formatBytes } from '../utils/format'
 
 export default function AudioUploader({ maxBytes, allowed, busy, progress, onUpload, onCancel }) {
@@ -9,8 +9,21 @@ export default function AudioUploader({ maxBytes, allowed, busy, progress, onUpl
   const [file, setFile] = useState(null)
   const [error, setError] = useState('')
 
-  function choose(nextFile) {
-    const message = validateAudioFile(nextFile, { maxBytes, allowed })
+  async function choose(nextFile) {
+    if (!nextFile) {
+      setError('')
+      setFile(null)
+      return
+    }
+    let header = null
+    if (typeof nextFile.slice === 'function') {
+      try {
+        header = new Uint8Array(await nextFile.slice(0, 32).arrayBuffer())
+      } catch {
+        header = null
+      }
+    }
+    const message = validateAudioFile(nextFile, { maxBytes, allowed, header })
     setError(message)
     setFile(message ? null : nextFile)
   }
@@ -40,7 +53,7 @@ export default function AudioUploader({ maxBytes, allowed, busy, progress, onUpl
           ref={inputRef}
           hidden
           type="file"
-          accept={allowed.join(',')}
+          accept={filePickerAccept(allowed)}
           onChange={(event) => choose(event.target.files?.[0])}
         />
       </div>
